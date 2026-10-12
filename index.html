@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pamela Marie - Mis XV Años</title>
+    <link rel="preload" as="image" href="foto0.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="CCSB.css?v=20">
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+    <style>
+        /* Carrusel: 3 imágenes simultáneamente con foto central destacada */
+        .carousel-track-container {
+            overflow: hidden;
+            width: 100%;
+            position: relative;
+        }
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease;
+            width: 100%;
+            overflow: visible;
+        }
+        .carousel-item {
+            flex: 0 0 33.333%; /* 3 imágenes por fila en PC */
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0; /* usamos gap del track para separación */
+        }
+        .carousel-item img {
+            display: block;
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 0;
+            box-shadow: 0 10px 24px rgba(185,122,116,0.35);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        /* Marco tipo polaroid ajustado al tamaño real de cada foto:
+           delgado en los tres lados y un poco más grueso en la base. */
+        .framed-photo {
+            width: auto !important;
+            height: auto !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            box-sizing: border-box !important;
+            margin: 0 auto;
+            object-fit: contain !important;
+            background: #FDF7F3 !important;
+            border: 6px solid #FDF7F3 !important;
+            outline: 1px solid rgba(176,141,87,.55);
+            border-bottom-width: 20px !important;
+        }
+
+        @media (min-width: 769px) {
+            .carousel-item.is-center .framed-photo {
+                transform: scale(1.12) rotate(-0.2deg);
+                box-shadow: 0 34px 68px rgba(176,141,87,0.45);
+            }
+        }
+        
+        /* Mobile: una imagen centrada */
+        @media (max-width: 768px) {
+            .carousel-item {
+                flex: 0 0 100% !important; /* 1 imagen por vista en móvil */
+                padding: 0 6px !important;
+                height: 380px !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+            }
+            .carousel-item img {
+                width: auto !important;
+                height: auto !important;
+                max-width: 100% !important;
+                max-height: 380px !important;
+                object-fit: contain !important;
+                transform: none !important;
+            }
+            .framed-photo {
+                border-width: 4px !important;
+                border-bottom-width: 14px !important;
+            }
+            
+            .carousel-track-container {
+                height: auto !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .carousel-item img {
+                width: auto !important;
+                height: auto !important;
+                max-width: 100% !important;
+                max-height: 320px !important;
+                object-fit: contain !important;
+                border-radius: 0;
+                transform: none !important;
+            }
+            .framed-photo {
+                border-width: 3px !important;
+                border-bottom-width: 10px !important;
+            }
+            
+            .carousel-item {
+                flex: 0 0 100% !important;
+                padding: 0 8px !important;
+                height: 320px !important;
+            }
+            
+            .carousel-track-container {
+                height: auto !important;
+            }
+        }
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #fff;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 2;
+            padding: 0 10px;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        /* Ajuste temporal: mantener altura visible sin tocar el attachment */
+        @media (min-width: 1025px) {
+            .hero-section {
+                background-image: url('foto0.jpg') !important;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="main-center">
+        <!-- Modal de Bienvenida -->
+        <div id="welcomeModal" class="modal-overlay">
+            <div class="welcome-hero">
+                <p class="welcome-kicker">Bienvenidos a la invitación de mis XV Años</p>
+                <h1 class="welcome-title">Pamela Marie</h1>
+                <p class="welcome-note">La música de fondo es parte de la experiencia</p>
+                <div class="welcome-actions">
+                    <button id="enterWithMusic" class="btn-gold" onclick="enterWithMusicClick()">Ingresar con música</button>
+                    <button id="enterWithoutMusic" class="btn-gold-outline" onclick="enterWithoutMusicClick()">Ingresar sin música</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reproductor de música -->
+        <div id="musicPlayer" class="music-player" style="display: none;">
+            <button id="musicToggle" class="music-button modern-icon" title="Reproducir/Pausar música">
+                <svg id="volumeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="#B08D57" stroke="#fff" stroke-width="1"></polygon>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.08" stroke="#B08D57" stroke-width="2"></path>
+                    <circle cx="6.5" cy="12" r="1" fill="#E3B5AE"/>
+                </svg>
+            </button>
+            <div id="youtube-player" style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></div>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <img class="hero-bg" src="foto0.jpg" alt="Portada XV años de Pamela Marie">
+            <div class="hero-overlay"></div>
+            <div class="top-garland">
+                <img src="separador-rosas.png?v=2" alt="">
+            </div>
+            <div class="hero-content">
+                <div class="hero-text">
+                    <div class="hero-kicker">Mis <span>XV</span> Años</div>
+                    <h1 class="names">Pamela Marie</h1>
+                    <div class="date">30 · 01 · 2027</div>
+                    <div class="scroll-indicator">
+                        <div class="scroll-mouse">
+                            <div class="scroll-wheel"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+        <div class="section-divider">
+            <img src="separador-rosas.png?v=2" alt="">
+        </div>
+
+        <!-- Countdown -->
+        <section class="countdown-section">
+            <h2 class="section-title">Faltan</h2>
+            <div class="countdown-container">
+                <div class="countdown-item">
+                    <div class="countdown-number" id="days">00</div>
+                    <div class="countdown-label">DÍAS</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="hours">00</div>
+                    <div class="countdown-label">HORAS</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="minutes">00</div>
+                    <div class="countdown-label">MINUTOS</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="seconds">00</div>
+                    <div class="countdown-label">SEGUNDOS</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fecha y Lugar -->
+        <div class="section-divider">
+            <img src="separador-rosas.png?v=2" alt="">
+        </div>
+        <section class="events-section">
+            <div class="events-container events-container-single">
+                <!-- Fiesta de XV -->
+                <div class="event-card">
+                    <div class="event-icon modern-icon">
+                        <img src="icono-corona.png?v=2" alt="Corona dorada" class="icon-img">
+                    </div>
+                    <h3 class="event-title">Mis XV</h3>
+                    <div class="event-details">
+                        <h4>Fecha</h4>
+                        <p>Sábado 30 de Enero de 2027</p>
+                    </div>
+                    <div class="event-details">
+                        <h4>Hora</h4>
+                        <p>5:00 p.m.</p>
+                    </div>
+                    <div class="event-details">
+                        <h4>Lugar</h4>
+                        <p>Casa Club Dr. José Ml. Alvarez (AGANI)</p>
+                    </div>
+                    <a class="btn-wedding btn-link" href="https://maps.app.goo.gl/To3j4JzUpoWVSnoX8" target="_blank" rel="noopener">¿Cómo llegar?</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Photo Gallery -->
+        <div class="section-divider">
+            <img src="separador-rosas.png?v=2" alt="">
+        </div>
+        <section class="gallery-section">
+            <div class="gallery-container">
+                <h2 class="section-title">Retratos de mis 15 Años</h2>
+                <p class="section-subtitle">Cada foto guarda un pedacito de esta historia que hoy florece</p>
+                
+                <div class="camera-icon modern-icon">
+                    <svg width="70" height="70" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="6" y="18" width="52" height="36" rx="6" fill="#B08D57"/>
+                        <rect x="24" y="10" width="16" height="10" rx="2" fill="#B08D57"/>
+                        <circle cx="32" cy="36" r="11" fill="#FDF7F3"/>
+                        <circle cx="32" cy="36" r="6" fill="#B08D57"/>
+                        <circle cx="48" cy="26" r="2.5" fill="#FDF7F3"/>
+                    </svg>
+                </div>
+                <!-- Carrusel -->
+                <div class="carousel-container">
+                  <button class="carousel-btn carousel-prev" id="prevBtn">❮</button>
+                  <div class="carousel-track-container">
+                    <div class="carousel-track" id="carouselTrack">
+                      <div class="carousel-item">
+                        <img class="framed-photo" src="foto1.jpg" alt="Foto 1 de los XV años">
+                      </div>
+                      <div class="carousel-item">
+                        <img class="framed-photo" src="foto2.jpg" alt="Foto 2 de los XV años">
+                      </div>
+                      <div class="carousel-item">
+                        <img class="framed-photo" src="foto3.jpg" alt="Foto 3 de los XV años">
+                      </div>
+                      <div class="carousel-item">
+                        <img class="framed-photo" src="foto4.jpg" alt="Foto 4 de los XV años">
+                      </div>
+                      <div class="carousel-item">
+                        <img class="framed-photo" src="foto5.jpg" alt="Foto 5 de los XV años">
+                      </div>
+                      <div class="carousel-item">
+                        <img class="framed-photo" src="foto6.jpg" alt="Foto 6 de los XV años">
+                      </div>
+                    </div>
+                  </div>
+                  <button class="carousel-btn carousel-next" id="nextBtn">❯</button>
+                </div>
+
+                <div class="carousel-counter">
+                  <span id="currentSlide">1</span> / <span id="totalSlides">6</span> fotos
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Party Information -->
+        <div class="section-divider">
+            <img src="separador-rosas.png?v=2" alt="">
+        </div>
+        <section class="party-section">
+            <div class="party-container">
+                <h2 class="section-title">Detalles</h2>
+                <p class="section-subtitle">Algunos detalles a tener en cuenta para esta noche especial.</p>
+
+                <div class="party-grid">
+                    <div class="party-card">
+                        <div class="party-icon modern-icon bowtie-icon">
+                            <img src="icono-vestimenta.png" alt="Vestido y traje" class="icon-img">
+                        </div>
+                        <h3>Código de Vestimenta</h3>
+                        <button class="btn-wedding" onclick="showDressCode()">Ver más</button>
+                    </div>
+
+                    <div class="party-card">
+                        <div class="party-icon modern-icon">
+                            <svg width="70" height="70" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="6" y="18" width="52" height="36" rx="6" fill="#B08D57"/>
+                                <rect x="24" y="10" width="16" height="10" rx="2" fill="#B08D57"/>
+                                <circle cx="32" cy="36" r="11" fill="#FDF7F3"/>
+                                <circle cx="32" cy="36" r="6" fill="#B08D57"/>
+                                <circle cx="48" cy="26" r="2.5" fill="#FDF7F3"/>
+                            </svg>
+                        </div>
+                        <h3>Comparte tus Fotos</h3>
+                        <p>Ayúdanos a capturar cada momento, sube las fotos que tomes durante la fiesta.</p>
+                        <a class="btn-wedding btn-link" href="https://photos.app.goo.gl/JKghJ3BQMotVFu7U8" target="_blank" rel="noopener">Subir Fotos</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mesa de Regalos -->
+        <div class="section-divider">
+            <img src="separador-rosas.png?v=2" alt="">
+        </div>
+        <section class="gifts-section">
+            <div class="gifts-container">
+                <h2 class="section-title">Mesa de Regalos</h2>
+                <p class="section-subtitle">Si deseas regalarme algo más que tu hermosa presencia.</p>
+                <div class="gift-icon modern-icon">
+                    <img src="icono-regalo.png" alt="Regalo" class="icon-img">
+                </div>
+                <button class="btn-wedding" onclick="showGifts()">Ver más</button>
+            </div>
+        </section>
+
+        <!-- RSVP -->
+        <div class="section-divider">
+            <img src="separador-rosas.png?v=2" alt="">
+        </div>
+        <section class="rsvp-section">
+            <div class="rsvp-container">
+                <h2 class="section-title">Confirma tu Asistencia</h2>
+                <p class="section-subtitle">Confirmar a más tardar el 2 de enero de 2027.</p>
+                
+                <div class="whatsapp-icon modern-icon">
+                    <svg width="80" height="80" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M24 4.5c-10.8 0-19.5 8.6-19.5 19.3 0 3.6 1 7 2.8 9.9L4.5 43.5l10.1-2.7c2.8 1.5 6 2.4 9.4 2.4 10.8 0 19.5-8.6 19.5-19.3S34.8 4.5 24 4.5z" fill="#B08D57"/>
+                        <path d="M24 8.3c-8.7 0-15.7 6.9-15.7 15.5 0 3.1.9 6 2.6 8.5l-1.6 5.6 5.8-1.5c2.6 1.6 5.6 2.4 8.9 2.4 8.7 0 15.7-6.9 15.7-15.5S32.7 8.3 24 8.3z" fill="#FDF7F3"/>
+                        <path d="M18.2 15.2c.6-.6 1.6-.5 2.1.2l2.1 3c.4.6.3 1.4-.2 1.9l-1.2 1.2c1 2.2 2.8 4 5 5l1.2-1.2c.5-.5 1.3-.6 1.9-.2l3 2.1c.7.5.8 1.5.2 2.1l-1.5 1.5c-1 1-2.5 1.3-3.8.7-4.4-1.9-7.9-5.4-9.8-9.8-.6-1.3-.3-2.8.7-3.8z" fill="#B08D57"/>
+                    </svg>
+                </div>
+
+                <a class="btn-wedding btn-link" href="https://wa.me/18099016603?text=%C2%A1Hola%21%20Confirmo%20mi%20asistencia%20a%20los%20XV%20a%C3%B1os%20de%20Pamela%20Marie%20el%20s%C3%A1bado%2030%20de%20enero%20de%202027.%20%C2%A1Gracias%20por%20la%20invitaci%C3%B3n%21" target="_blank" rel="noopener">Confirmar</a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <div class="section-divider">
+            <img src="separador-rosas.png?v=2" alt="">
+        </div>
+        <footer class="footer">
+            <div class="footer-content">
+                <p>Con cariño,</p>
+                <h3>Pamela Marie</h3>
+                <p class="footer-date">30 de Enero, 2027</p>
+            </div>
+        </footer>
+        </div>
+
+        <!-- Modal Dress Code -->
+        <div id="dresscodeModal" class="modal-overlay" onclick="closeDressCodeModal(event)">
+            <div class="dresscode-modal" onclick="event.stopPropagation()">
+                <button class="modal-close" onclick="closeDressCodeModal()" aria-label="Cerrar">&times;</button>
+                <h2 class="modal-title-dark">Código de Vestimenta</h2>
+                <div class="dresscode-list">
+                    <p class="modal-text-dark"><strong>Hombres:</strong> Trajes o chacabana</p>
+                    <p class="modal-text-dark"><strong>Mujeres:</strong> Vestidos</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Mesa de Regalos -->
+        <div id="giftsModal" class="modal-overlay" onclick="closeGiftsModal()">
+            <div class="gifts-modal" role="dialog" aria-modal="true" aria-labelledby="giftsModalTitle" onclick="event.stopPropagation()">
+                <button class="modal-close gifts-close" onclick="closeGiftsModal()" aria-label="Cerrar">&times;</button>
+                <h2 id="giftsModalTitle" class="gifts-modal-title">Mesa de Regalos</h2>
+                <div class="gift-accounts">
+                    <article class="gift-account">
+                        <p class="gift-type">Cuenta de Ahorro</p>
+                        <p class="gift-bank">Banreservas</p>
+                        <div class="gift-row">
+                            <span class="gift-label">Número</span>
+                            <span class="gift-value gift-number">2700258027</span>
+                            <button type="button" class="copy-btn" data-copy="2700258027" aria-label="Copiar número de cuenta 2700258027">Copiar</button>
+                        </div>
+                        <p class="gift-holder">Felina Rijo Cedeño</p>
+                        <div class="gift-row">
+                            <span class="gift-label">Cédula</span>
+                            <span class="gift-value">028-0011261-3</span>
+                            <button type="button" class="copy-btn" data-copy="02800112613" aria-label="Copiar cédula 028-0011261-3">Copiar</button>
+                        </div>
+                    </article>
+                    <article class="gift-account">
+                        <p class="gift-type">Cuenta Corriente</p>
+                        <p class="gift-bank">Banco Popular</p>
+                        <div class="gift-row">
+                            <span class="gift-label">Número</span>
+                            <span class="gift-value gift-number">743021602</span>
+                            <button type="button" class="copy-btn" data-copy="743021602" aria-label="Copiar número de cuenta 743021602">Copiar</button>
+                        </div>
+                        <p class="gift-holder">Maylly Guadalupe Gómez Rijo</p>
+                        <div class="gift-row">
+                            <span class="gift-label">Cédula</span>
+                            <span class="gift-value">028-0091676-5</span>
+                            <button type="button" class="copy-btn" data-copy="02800916765" aria-label="Copiar cédula 028-0091676-5">Copiar</button>
+                        </div>
+                    </article>
+                    <article class="gift-account">
+                        <p class="gift-type">Cuenta de Ahorro</p>
+                        <p class="gift-bank">Banco BHD</p>
+                        <div class="gift-row">
+                            <span class="gift-label">Número</span>
+                            <span class="gift-value gift-number">08086380014</span>
+                            <button type="button" class="copy-btn" data-copy="08086380014" aria-label="Copiar número de cuenta 08086380014">Copiar</button>
+                        </div>
+                        <p class="gift-holder">Maylly Guadalupe Gómez Rijo</p>
+                        <div class="gift-row">
+                            <span class="gift-label">Cédula</span>
+                            <span class="gift-value">028-0091676-5</span>
+                            <button type="button" class="copy-btn" data-copy="02800916765" aria-label="Copiar cédula 028-0091676-5">Copiar</button>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast notification -->
+        <div id="toast" class="toast">
+            <div id="toastContent"></div>
+        </div>
+
+        <script>
+        (function() {
+            try {
+                if ('caches' in window) {
+                    caches.keys().then(keys => keys.forEach(k => caches.delete(k))).catch(() => {});
+                }
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister())).catch(() => {});
+                }
+            } catch(e) {}
+        })();
+        </script>
+        <script src="JAVAB.js?v=20" defer></script>
+</body>
+</html>
