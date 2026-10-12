@@ -1,235 +1,85 @@
 // Variables globales
 let isPlaying = false;
-let player = null;
-let playerReady = false;
 let currentSlide = 0;
 let totalSlides = 0;
 let enableMusic = false;
 
-// Funciones globales para los botones del modal
-function enterWithMusicClick() {
-    // console.log('Función enterWithMusicClick() ejecutada');
-    enableMusic = true;
-    const modal = document.getElementById('welcomeModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+// Música de fondo (archivo local musica.mp3)
+const bgMusic = new Audio('musica.mp3');
+bgMusic.loop = true;
+bgMusic.preload = 'auto';
+bgMusic.volume = 0.85;
+bgMusic.addEventListener('play', () => { isPlaying = true; updateMusicIcon(); });
+bgMusic.addEventListener('pause', () => { isPlaying = false; updateMusicIcon(); });
 
-    // El player se precarga desde DOMContentLoaded (ver loadYouTubeAPI más abajo),
-    // así que si ya está listo llamamos playVideo() de inmediato, dentro del mismo
-    // tick del click. Eso es justo lo que iOS Safari exige para permitir el audio;
-    // si el player se crea o se reproduce de forma asíncrona (fuera del gesto del
-    // usuario), iOS lo bloquea en silencio y por eso antes no sonaba en iPhone.
-    if (playerReady && player) {
-        document.getElementById('musicPlayer').style.display = 'block';
-        player.unMute();
-        player.setVolume(100);
-        player.playVideo();
-        isPlaying = true;
-        updateMusicIcon();
-        // En iOS/Safari a veces el primer playVideo() no arranca el audio
-        // aunque sí "conecta" el gesto; reintentamos una vez, todavía
-        // dentro del mismo ciclo de interacción del usuario.
-        setTimeout(() => {
-            if (player && typeof player.getPlayerState === 'function' && player.getPlayerState() !== 1) {
-                player.unMute();
-                player.playVideo();
-            }
-        }, 300);
+function showMusicButton() {
+    const musicPlayer = document.getElementById('musicPlayer');
+    if (musicPlayer) musicPlayer.style.display = 'block';
+}
+
+function playMusic() {
+    showMusicButton();
+    const p = bgMusic.play();
+    if (p && typeof p.catch === 'function') {
+        p.catch(() => { isPlaying = false; updateMusicIcon(); });
     }
-    // Si el player todavía no está listo (conexión lenta), onPlayerReady se
-    // encarga de reproducir apenas termine de inicializar.
+}
+
+function closeWelcome() {
+    const modal = document.getElementById('welcomeModal');
+    if (modal) modal.style.display = 'none';
+}
+
+// Botones del modal de bienvenida (se llaman directo desde el click,
+// así iOS/Safari permite que suene la música)
+function enterWithMusicClick() {
+    enableMusic = true;
+    closeWelcome();
+    playMusic();
 }
 
 function enterWithoutMusicClick() {
-    // console.log('Función enterWithoutMusicClick() ejecutada');
     enableMusic = false;
-    const modal = document.getElementById('welcomeModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    closeWelcome();
+    showMusicButton();
 }
 
-// Función para configurar los botones directamente
-function setupModalButtons() {
-    const enterWithMusic = document.getElementById('enterWithMusic');
-    const enterWithoutMusic = document.getElementById('enterWithoutMusic');
-    const modal = document.getElementById('welcomeModal');
-
-    // console.log('Configurando botones del modal...', { enterWithMusic, enterWithoutMusic, modal });
-
-    if (enterWithMusic) {
-        enterWithMusic.onclick = function() {
-            // console.log('Botón CON música clickeado');
-            enableMusic = true;
-            if (modal) {
-                modal.style.display = 'none';
-            }
-            // Mismo arreglo que en enterWithMusicClick: reproducir de forma
-            // síncrona dentro del click si el player ya está precargado.
-            if (playerReady && player) {
-                const musicPlayer = document.getElementById('musicPlayer');
-                if (musicPlayer) musicPlayer.style.display = 'block';
-                player.unMute();
-                player.setVolume(100);
-                player.playVideo();
-                isPlaying = true;
-                updateMusicIcon();
-                setTimeout(() => {
-                    if (player && typeof player.getPlayerState === 'function' && player.getPlayerState() !== 1) {
-                        player.unMute();
-                        player.playVideo();
-                    }
-                }, 300);
-            }
-        };
-    }
-
-    if (enterWithoutMusic) {
-        enterWithoutMusic.onclick = function() {
-            // console.log('Botón SIN música clickeado');
-            enableMusic = false;
-            if (modal) {
-                modal.style.display = 'none';
-            }
-        };
+function toggleMusic() {
+    if (bgMusic.paused) {
+        playMusic();
+    } else {
+        bgMusic.pause();
     }
 }
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
-    // console.log('DOM cargado, inicializando...');
     initializeCountdown();
     initializeCarousel();
-    setupModalButtons();
+
+    const musicToggle = document.getElementById('musicToggle');
+    if (musicToggle) musicToggle.addEventListener('click', toggleMusic);
 
     // Mostrar el modal de bienvenida para elegir con/sin música
     const modal = document.getElementById('welcomeModal');
-    if (modal) {
-        modal.style.display = 'flex';
-    }
-
-    // Se precarga el player de YouTube desde el inicio (no en el click) para
-    // que playVideo() pueda ejecutarse de forma síncrona dentro del gesto del
-    // usuario en enterWithMusicClick(). Esto es lo que exige iOS Safari.
-    loadYouTubeAPI();
-});
-
-// También configurar cuando la página esté completamente cargada
-window.addEventListener('load', function() {
-    // console.log('Ventana completamente cargada');
-    setupModalButtons();
-});
-
-
-
-// Cargar la API de YouTube
-function loadYouTubeAPI() {
-    const script = document.createElement('script');
-    script.src = 'https://www.youtube.com/iframe_api';
-    document.body.appendChild(script);
-    window.onYouTubeIframeAPIReady = initializeYouTubePlayer;
-}
-
-// Función llamada por la API de YouTube
-function initializeYouTubePlayer() {
-    if (player) return; // ya inicializado, evita crear el player dos veces
-
-    player = new YT.Player('youtube-player', {
-        height: '1',
-        width: '1',
-        videoId: 'vwp1yxtcD7I',
-        playerVars: {
-            autoplay: 0,
-            controls: 0,
-            disablekb: 1,
-            fs: 0,
-            loop: 1,
-            modestbranding: 1,
-            playsinline: 1,
-            rel: 0,
-            showinfo: 0,
-            iv_load_policy: 3,
-            playlist: 'vwp1yxtcD7I'
-        },
-        events: {
-            'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange,
-            'onError': onPlayerError
-        }
-    });
-}
-
-function onPlayerReady(event) {
-    playerReady = true;
-    const musicPlayer = document.getElementById('musicPlayer');
-    const musicToggle = document.getElementById('musicToggle');
-
-    if (musicToggle) {
-        musicToggle.addEventListener('click', toggleMusic);
-    }
-
-    // Caso borde: el usuario ya hizo click en "con música" antes de que el
-    // player terminara de inicializar (ej. conexión lenta). Lo reproducimos
-    // apenas esté listo.
-    if (enableMusic && !isPlaying) {
-        if (musicPlayer) musicPlayer.style.display = 'block';
-        event.target.unMute();
-        event.target.setVolume(100);
-        event.target.playVideo();
-        isPlaying = true;
-        updateMusicIcon();
-    }
-}
-
-function onPlayerStateChange(event) {
-    if (event.data === YT.PlayerState.PLAYING) {
-        isPlaying = true;
-    } else if (event.data === YT.PlayerState.PAUSED) {
-        isPlaying = false;
-    }
+    if (modal) modal.style.display = 'flex';
     updateMusicIcon();
-}
-
-function onPlayerError(event) {
-    console.log('Error al cargar el video de YouTube');
-    const musicPlayer = document.getElementById('musicPlayer');
-    musicPlayer.style.display = 'block';
-    isPlaying = false;
-    updateMusicIcon();
-}
-
-function toggleMusic() {
-    if (player) {
-        if (isPlaying) {
-            player.pauseVideo();
-            isPlaying = false;
-        } else {
-            player.playVideo();
-            isPlaying = true;
-        }
-        updateMusicIcon();
-    }
-}
+});
 
 function updateMusicIcon() {
     const volumeIcon = document.getElementById('volumeIcon');
-    
-    if (volumeIcon) {
-        if (isPlaying) {
-            volumeIcon.innerHTML = `
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="#222" stroke="#fff" stroke-width="1"></polygon>
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.08" stroke="#222" stroke-width="2"></path>
-                <circle cx="6.5" cy="12" r="1" fill="#E3B5AE"/>
-            `;
-        } else {
-            volumeIcon.innerHTML = `
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="#222" stroke="#fff" stroke-width="1"></polygon>
-                <line x1="19" y1="9" x2="17" y2="11" stroke="#ff6b6b" stroke-width="2"></line>
-                <line x1="17" y1="9" x2="19" y2="11" stroke="#ff6b6b" stroke-width="2"></line>
-                <circle cx="6.5" cy="12" r="1" fill="#ff6b6b"/>
-            `;
-        }
+    if (!volumeIcon) return;
+    if (isPlaying) {
+        volumeIcon.innerHTML = `
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="#FFFFFF"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.08" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"></path>
+        `;
+    } else {
+        volumeIcon.innerHTML = `
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="#FFFFFF"></polygon>
+            <line x1="22" y1="9" x2="16" y2="15" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"></line>
+            <line x1="16" y1="9" x2="22" y2="15" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"></line>
+        `;
     }
 }
 

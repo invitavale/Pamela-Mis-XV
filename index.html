@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="CCSB.css?v=20">
+    <link rel="stylesheet" href="CCSB.css?v=21">
     <script src="https://cdn.lordicon.com/lordicon.js"></script>
     <style>
         /* Carrusel: 3 imágenes simultáneamente con foto central destacada */
@@ -172,7 +172,6 @@
                     <circle cx="6.5" cy="12" r="1" fill="#E3B5AE"/>
                 </svg>
             </button>
-            <div id="youtube-player" style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></div>
         </div>
 
         <!-- Hero Section -->
@@ -397,8 +396,16 @@
             <div class="dresscode-modal" onclick="event.stopPropagation()">
                 <button class="modal-close" onclick="closeDressCodeModal()" aria-label="Cerrar">&times;</button>
                 <h2 class="modal-title-dark">Código de Vestimenta</h2>
+                <p class="dresscode-note">Colores reservados para la quinceañera</p>
+                <div class="dresscode-colors">
+                    <figure class="dc-color"><span class="color-dot" style="background:#E8C4C0;"></span><figcaption>Rosa palo</figcaption></figure>
+                    <figure class="dc-color"><span class="color-dot" style="background:#F7C6D9;"></span><figcaption>Rosa pastel</figcaption></figure>
+                    <figure class="dc-color"><span class="color-dot" style="background:#E4007C;"></span><figcaption>Rosa fucsia</figcaption></figure>
+                    <figure class="dc-color"><span class="color-dot" style="background:#FA8072;"></span><figcaption>Rosa salmón</figcaption></figure>
+                    <figure class="dc-color"><span class="color-dot" style="background:#F88379;"></span><figcaption>Rosa coral</figcaption></figure>
+                </div>
                 <div class="dresscode-list">
-                    <p class="modal-text-dark"><strong>Hombres:</strong> Trajes o chacabana</p>
+                    <p class="modal-text-dark"><strong>Hombres:</strong> Traje formal o chacabana</p>
                     <p class="modal-text-dark"><strong>Mujeres:</strong> Vestidos</p>
                 </div>
             </div>
@@ -476,6 +483,6 @@
             } catch(e) {}
         })();
         </script>
-        <script src="JAVAB.js?v=20" defer></script>
+        <script src="JAVAB.js?v=21" defer></script>
 </body>
 </html>
